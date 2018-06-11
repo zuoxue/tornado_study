@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>新建房源</title>
+    </head>
+    <body>
+        <form method="post" action="/">
+            <textarea name="text"></textarea>
+            <input type="submit" value="提交">
+        </form>
+        {% raw text %}
+        {{escape(text)}}
+    </body>
+</html>

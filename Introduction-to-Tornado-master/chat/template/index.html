@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>聊天室</title>
+</head>
+<body>
+    <div id="contents" style="height:500px;overflow:auto;"></div>
+    <div>
+        <textarea id="msg"></textarea>
+        <a href="javascript:;" onclick="sendMsg()">发送</a><br>
+        <p>
+            <input type="button" value="获取位置信息" id="get_pos"/>
+            <p id="pos"></p>
+        </p>
+    </div>
+    <script src="{{static_url('jquery.min.js')}}"></script>
+    <script type="text/javascript">
+        var ws = new WebSocket("ws://192.168.1.176:8000/chat");
+        ws.onmessage = function(e) {
+            $("#contents").append("<p>" + e.data + "</p>");
+        }
+        function sendMsg() {
+            var msg = $("#msg").val();
+            ws.send(msg);
+            $("#msg").val("");
+        }
+        $(function () {
+            $("#get_pos").click(function(){
+                $.ajax({
+                    url:'/getpos',
+                    data:{},
+                    dataType:'json',
+                    type:"post",
+                    success:function(res){
+                        console.log(res);
+                        $("#pos").text(res);
+                    }
+                })
+            })
+        })
+    </script>
+</body>
+</html>
