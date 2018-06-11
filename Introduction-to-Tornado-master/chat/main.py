@@ -55,10 +55,9 @@ class getPosHandler(tornado.web.RequestHandler):
             self.send_error(500)
         else:
             data = json.loads(response.body)
-            print(data)
+            # self.set_header('Content-Type','application/json;charset=UTF-8')
             if 0 == data["code"]:
-                print(u"省份: %s 城市: %s" % (data['data']["region"], data['data']["city"]))
-                return self.write(u"省份: %s 城市: %s" % (data['data']["region"], data['data']["city"]))
+                self.write(u"省份: %s 城市: %s" % (data['data']["region"], data['data']["city"]))
             else:
                 self.write("查询IP信息错误")
         self.finish() # 发送响应信息，结束请求处理

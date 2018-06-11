@@ -16,7 +16,7 @@
     </div>
     <script src="{{static_url('jquery.min.js')}}"></script>
     <script type="text/javascript">
-        var ws = new WebSocket("ws://192.168.1.176:8000/chat");
+        var ws = new WebSocket("ws://192.168.142.1:8000/chat");
         ws.onmessage = function(e) {
             $("#contents").append("<p>" + e.data + "</p>");
         }
@@ -30,11 +30,14 @@
                 $.ajax({
                     url:'/getpos',
                     data:{},
-                    dataType:'json',
                     type:"post",
+                    dataType:'json',
+                    async:true,
                     success:function(res){
-                        console.log(res);
                         $("#pos").text(res);
+                    },
+                    error:function(ret){
+                        console.log(ret);
                     }
                 })
             })
