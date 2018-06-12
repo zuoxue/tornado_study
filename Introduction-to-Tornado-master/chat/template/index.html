@@ -10,6 +10,7 @@
         <textarea id="msg"></textarea>
         <a href="javascript:;" onclick="sendMsg()">发送</a><br>
         <p>
+            {% module xsrf_form_html() %}
             <input type="button" value="获取位置信息" id="get_pos"/>
             <p id="pos"></p>
         </p>
@@ -25,16 +26,25 @@
             ws.send(msg);
             $("#msg").val("");
         }
+        function get_cookie(name){
+            var r = document.cookie.match('\\b'+name+'=([^;]*)\\b');
+            return r ? r[1]:''
+        }
         $(function () {
             $("#get_pos").click(function(){
+                var xsrf = get_cookie('_xsrf')
+                console.log(xsrf)
                 $.ajax({
                     url:'/getpos',
                     data:{},
                     type:"post",
                     dataType:'json',
+                    header:{
+                        'X-XSRFToken':xsrf
+                    },
                     async:true,
                     success:function(res){
-                        $("#pos").text(res);
+                        $("#pos").text(res.data);
                     },
                     error:function(ret){
                         console.log(ret);

@@ -50,6 +50,7 @@ class getPosHandler(tornado.web.RequestHandler):
                    callback=self.on_response)
 
     def on_response(self, response):
+        print(self.get_secure_cookie('_xsrf'))
         if response.error:
             print(response.error)
             self.send_error(500)
@@ -57,7 +58,7 @@ class getPosHandler(tornado.web.RequestHandler):
             data = json.loads(response.body)
             # self.set_header('Content-Type','application/json;charset=UTF-8')
             if 0 == data["code"]:
-                self.write(u"省份: %s 城市: %s" % (data['data']["region"], data['data']["city"]))
+                self.write({'data':u"省份: %s 城市: %s" % (data['data']["region"], data['data']["city"])})
             else:
                 self.write("查询IP信息错误")
         self.finish() # 发送响应信息，结束请求处理
@@ -73,6 +74,7 @@ if __name__ == '__main__':
         template_path = os.path.join(os.path.dirname(__file__), "template"),
         debug = True,
 		xsrf_cookies=False,
+        cookie_secret='NGU3ZDE5MjYyNTU1NDVlZTlhYjhiYTljMGZjM2VhNDU4YWJkOTBiODcxNTg0Y2RjYWM4NDg1M2ZhMDljMjUxMw=='
         )
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)
