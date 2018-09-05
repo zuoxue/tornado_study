@@ -51,7 +51,7 @@ function requestInventory() {
 	jQuery.getJSON('//localhost:8000/cart/status', {session: document.session},
 		function(data, status, xhr) {
 			$('#count').html(data['inventoryCount']);
-			setTimeout(requestInventory, 0);
+			// setTimeout(requestInventory, 0);
 		}
 	);
 }

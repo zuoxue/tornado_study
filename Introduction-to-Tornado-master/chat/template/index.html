@@ -5,7 +5,9 @@
     <title>聊天室</title>
 </head>
 <body>
+    <p>{{con}}</p>
     <div id="contents" style="height:500px;overflow:auto;"></div>
+
     <div>
         <textarea id="msg"></textarea>
         <a href="javascript:;" onclick="sendMsg()">发送</a><br>
@@ -14,6 +16,12 @@
             <input type="button" value="获取位置信息" id="get_pos"/>
             <p id="pos"></p>
         </p>
+    </div>
+    <div>
+        <form action="{{reverse_url('download')}}" method="post">
+            <button id="load" type="submit">下载</button>
+        </form>
+        <!--<a href="{{reverse_url('download')}}">下载</a>-->
     </div>
     <script src="{{static_url('jquery.min.js')}}"></script>
     <script type="text/javascript">
@@ -50,7 +58,21 @@
                         console.log(ret);
                     }
                 })
-            })
+            });
+//            $("#load").click(function(){
+//                var link = $(this).attr("link");
+//                $.ajax({
+//                    url:link,
+//                    data:{},
+//                    type:"POST",
+//                    success:function(ret){
+//                        $.noop()
+//                    },
+//                    fail:function(ret){
+//                        $.noop()
+//                    }
+//                })
+//            })
         })
     </script>
 </body>

@@ -4,6 +4,8 @@ import os
 
 PORT = 8000
 
+SITE_ROOT = os.path.dirname(__file__)
+
 settings = {
     'template_path':os.path.join(os.path.dirname(__file__),'templates'),
     'static_path':os.path.join(os.path.dirname(__file__),'static'),

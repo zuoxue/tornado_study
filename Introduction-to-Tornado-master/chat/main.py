@@ -7,28 +7,55 @@ import tornado.options
 import tornado.httpclient
 import os
 import datetime
-
-from tornado.web import RequestHandler
+import redis
+import StringIO
+import settings
+from tornado import gen
+from tornado.web import RequestHandler,url
 from tornado.options import define, options
 from tornado.websocket import WebSocketHandler
+from concurrent.futures import ThreadPoolExecutor
 import json
 define("port", default=8000, type=int)
 
+def say_hello():
+    return "hello"
+
 class IndexHandler(RequestHandler):
+    @gen.coroutine
     def get(self):
-        self.render("index.html")
+        con = yield ThreadPoolExecutor(2).submit(say_hello)
+        self.render("index.html",**{"con":con})
+
+
+class make_app(object):
+    def __init__(self):
+        self.cache = redis.StrictRedis("localhost",6379)
+        self.key = 'users'
+
+    def add(self,name):
+        self.cache.hset(self.key,name,"OK")
+
+    def pop(self,name):
+        self.cache.hdel(self.key,name)
+
+    def get_all(self):
+        return self.cache.hgetall(self.key)
+
 
 class ChatHandler(WebSocketHandler):
 
     users = set()  # 用来存放在线用户的容器
+    # users = make_app()
 
     def open(self):
-        self.users.add(self)  # 建立连接后添加用户到容器中
+        self.sessionid = self.get_secure_cookie()
+        self.users.add(self.sessionid)  # 建立连接后添加用户到容器中
         for u in self.users:  # 向已在线用户发送消息
             u.write_message(u"[%s]-[%s]-进入聊天室" % (self.request.remote_ip, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
     def on_message(self, message):
-        for u in self.users:  # 向在线用户广播消息
+        for u in self.users.get_all():  # 向在线用户广播消息
             u.write_message(u"[%s]-[%s]-说：%s" % (self.request.remote_ip, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), message))
 
     def on_close(self):
@@ -38,6 +65,29 @@ class ChatHandler(WebSocketHandler):
 
     def check_origin(self, origin):
         return True  # 允许WebSocket的跨域请求
+
+
+class DownLoadHandler(RequestHandler):
+    def post(self):
+        file = os.path.join(os.path.join(os.path.dirname(__file__)),'static','doc',ur'03.客户信息监控报告 v2.zip')
+
+        # with open(file,"rb") as f:
+        #     k = f.read(1024)
+        #     print(k)
+        #     while k:
+        #         self.write(k)
+        excel_stream = StringIO.StringIO()
+        file_object = open(file, 'rb')
+        while True:
+            line = file_object.readline()
+            excel_stream.write(line)
+            if len(line) == 0:
+                break
+        file_object.close()
+        self.set_header('Content-Type', 'appliction/octet-stream')
+        self.set_header('Content-Disposition', u'attachment; filename={}'.format(ur'03.客户信息监控报告 v2.zip'))
+        self.write(excel_stream.getvalue())
+        return
 
 
 class getPosHandler(tornado.web.RequestHandler):
@@ -69,6 +119,7 @@ if __name__ == '__main__':
             (r"/", IndexHandler),
             (r"/chat", ChatHandler),
 			(r'/getpos',getPosHandler),
+            url(r'/download',DownLoadHandler,name="download")
         ],
         static_path = os.path.join(os.path.dirname(__file__), "static"),
         template_path = os.path.join(os.path.dirname(__file__), "template"),
@@ -78,4 +129,5 @@ if __name__ == '__main__':
         )
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(options.port)
+    print("http://127.0.0.1:%s" % options.port)
     tornado.ioloop.IOLoop.current().start()

@@ -38,8 +38,10 @@ class ShoppingCart(object):
 
 class DetailHandler(tornado.web.RequestHandler):
 	def get(self):
-		session = uuid4()
+		# session = uuid4()
+		session = self.request.remote_ip
 		count = self.application.shoppingCart.getInventoryCount()
+		print(self.application.shoppingCart.carts)
 		self.set_header("Access-Control-Allow-Origin", "*")
 		self.render("index.html", session=session, count=count)
 
@@ -82,7 +84,8 @@ class Application(tornado.web.Application):
 
 		settings = {
 			'template_path': 'templates',
-			'static_path': 'static'
+			'static_path': 'static',
+			'autoreload':True,
 		}
 
 		tornado.web.Application.__init__(self, handlers, **settings)
